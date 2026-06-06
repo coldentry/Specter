@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML>
+  <HEAD>
+    <META name="generator" content=
+    "HTML Tidy for Java (vers. 2009-12-01), see jtidy.sourceforge.net">
+    <META http-equiv="Content-Language" content="en-us">
+    <META http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <META name="GENERATOR" content="Microsoft FrontPage 4.0">
+    <META name="ProgId" content="FrontPage.Editor.Document">
+
+    <TITLE>Specter Help</TITLE>
+    <LINK rel="stylesheet" type="text/css" href="help/shared/DefaultStyle.css">
+  </HEAD>
+
+  <BODY>
+    <H1><a name="HelpAnchor"></a>Specter Help</H1>
+
+    <P>Specter is a Ghidra extension by Cold Entry LLC for agent-assisted reverse engineering.</P>
+
+    <P>Specter can inspect the active program using decompilation, disassembly, cross references,
+    and regex-based searches. It can also update the active program database by renaming listing
+    items, adding listing or decompiler-visible comments, renaming parameters and local variables,
+    and creating functions at undefined locations.</P>
+
+    <P>The terminal starts in DSL mode with the <CODE>specter dsl&gt;</CODE> prompt, where
+    entered text runs as Specter DSL or SQL-like statements against the active program. Press
+    <CODE>Ctrl+M</CODE> to switch to chat mode with the <CODE>specter chat&gt;</CODE> prompt,
+    where entered text is sent to the configured chat model. Slash commands work in both modes,
+    including <CODE>/model</CODE> for model profiles, <CODE>/subagent</CODE> for saved sub-agent
+    definitions, <CODE>/resetprefs</CODE> to clear Specter preferences after confirmation,
+    <CODE>/new</CODE> to clear the current conversation, <CODE>/thinking</CODE> to control
+    thinking visibility, and <CODE>/dsl</CODE> to show DSL help. Up and Down recall input
+    history for the current mode. DSL and chat histories are saved across Ghidra sessions and
+    cleared by <CODE>/resetprefs</CODE>.</P>
+
+    <P>The assistant uses a <CODE>RunSpecterDslQuery</CODE> tool for most read-only program
+    context, including function queries, strings, symbols, defined data, references,
+    decompilation, instruction listings, grouping, ordering, and DSL loops. Separate tools remain
+    available for current cursor location, datatype work, sub-agents, and approval-gated database
+    edits.</P>
+
+    <P>Use <CODE>/model</CODE> to choose the model provider for each saved profile. Select
+    <CODE>OpenAI-compatible</CODE> for the official OpenAI API and compatible local servers such
+    as llama.cpp. For llama.cpp, use the server's <CODE>/v1</CODE> base URL, for example
+    <CODE>http://127.0.0.1:8080/v1</CODE>, leave the API key blank unless the server requires
+    one, and enter the model name or alias accepted by the server. Select
+    <CODE>Ollama native</CODE> for Ollama's native <CODE>/api/chat</CODE> endpoint.</P>
+
+    <P>DSL mode accepts plain SQL over the <CODE>FUNCTION</CODE>,
+    <CODE>STRING</CODE>, <CODE>DATA</CODE>, <CODE>REFERENCE</CODE>, and
+    <CODE>SYMBOL</CODE> virtual tables.
+    Add <CODE>UNIQUE</CODE> or <CODE>DISTINCT</CODE> after <CODE>SELECT</CODE> to keep only the
+    first row for each selected value tuple. Example:
+    <CODE>SELECT name, entry FROM FUNCTION WHERE name LIKE 'FUN_%' ORDER BY
+    entry LIMIT 20;</CODE> Hexadecimal numeric literals are supported, for example
+    <CODE>SELECT entry, name FROM FUNCTION WHERE entry &gt;= 0x4044d1;</CODE>
+    The <CODE>BETWEEN</CODE>, <CODE>IN</CODE>, <CODE>NOT IN</CODE>, <CODE>LIKE</CODE>, and
+    <CODE>NOT LIKE</CODE> operators are supported, and predicates may be combined with
+    <CODE>AND</CODE>, <CODE>OR</CODE>, and parentheses.</P>
+
+    <P>SQL <CODE>JOIN</CODE> supports explicit inner joins with table aliases,
+    <CODE>ON</CODE> predicates, and qualified columns such as <CODE>caller.name</CODE>.
+    To find callers, join <CODE>REFERENCE.from_address</CODE> against a function body range
+    because the reference source is the callsite address:
+    <CODE>SELECT UNIQUE caller.entry, caller.name, r.from_address FROM REFERENCE r
+    JOIN FUNCTION callee ON r.to_address = callee.entry JOIN FUNCTION caller ON
+    r.from_address &gt;= caller.body_min AND r.from_address &lt;= caller.body_max WHERE
+    callee.entry = 0x4044d1 AND r.type IN ('COMPUTED_CALL', 'UNCONDITIONAL_CALL')
+    ORDER BY caller.name LIMIT 100;</CODE></P>
+
+    <P>The <CODE>STRING</CODE> table exposes defined string data with <CODE>address</CODE>,
+    <CODE>value</CODE>, <CODE>data_type</CODE>, and <CODE>length</CODE> columns. Example:
+    <CODE>SELECT * FROM STRING WHERE value LIKE 'usage:%';</CODE>
+    Another example:
+    <CODE>SELECT address, value, length FROM STRING WHERE value LIKE '%http%' ORDER BY
+    address LIMIT 20;</CODE></P>
+
+    <P>The <CODE>DATA</CODE> table exposes defined data items for constants and globals with
+    columns including <CODE>address</CODE>, <CODE>name</CODE>, <CODE>data_type</CODE>,
+    <CODE>value</CODE>, <CODE>value_text</CODE>, <CODE>is_constant</CODE>,
+    <CODE>is_global</CODE>, and <CODE>reference_count</CODE>. Examples:
+    <CODE>SELECT address, name, data_type, value_text FROM DATA WHERE is_global = true
+    ORDER BY address LIMIT 20;</CODE>
+    <CODE>SELECT address, data_type, value FROM DATA WHERE is_constant = true
+    ORDER BY address LIMIT 20;</CODE></P>
+
+    <P>The <CODE>REFERENCE</CODE> table exposes raw Ghidra references with
+    <CODE>from_address</CODE>, <CODE>to_address</CODE>, <CODE>type</CODE>,
+    and <CODE>source</CODE> columns. Examples:
+    <CODE>SELECT from_address, to_address, type FROM REFERENCE WHERE to_address =
+    0x4044d1 LIMIT 20;</CODE>
+    <CODE>SELECT from_address, to_address, type FROM REFERENCE WHERE type IN
+    ('COMPUTED_CALL', 'UNCONDITIONAL_CALL') LIMIT 50;</CODE></P>
+
+    <P>The <CODE>SYMBOL</CODE> table exposes primary symbols with <CODE>address</CODE>,
+    <CODE>name</CODE>, <CODE>namespace</CODE>, and <CODE>source</CODE> columns.</P>
+
+    <P><CODE>SELECT UNIQUE</CODE> removes duplicate result rows before applying
+    <CODE>LIMIT</CODE>. Example:
+    <CODE>SELECT UNIQUE namespace FROM FUNCTION ORDER BY namespace LIMIT 20;</CODE></P>
+
+    <P>The first DSL construct is a read-only loop:
+    <CODE>FOR level IN SELECT callgraph_level(entry) FROM FUNCTION ORDER BY
+    callgraph_level(entry) DESC LIMIT 2; DO SELECT entry, name FROM FUNCTION WHERE
+    callgraph_level(entry) = :level LIMIT 5; END;</CODE></P>
+
+    <P>Write-capable SQL statements support listing renames:
+    <CODE>UPDATE FUNCTION SET name = 'parse_header' WHERE entry = 0x4044d1;</CODE>
+    <CODE>UPDATE FUNCTION SET name = prompt('Suggest a function name') WHERE entry =
+    0x4044d1;</CODE>
+    <CODE>UPDATE DATA SET name = 'global_config' WHERE address = 0x405000;</CODE>
+    <CODE>UPDATE SYMBOL SET name = 'dispatch_table' WHERE address = 0x406000;</CODE>
+    <CODE>UPDATE</CODE> supports <CODE>FUNCTION.name</CODE>, <CODE>DATA.name</CODE>, and
+    <CODE>SYMBOL.name</CODE>, requires a <CODE>WHERE</CODE> clause, and records renames with
+    Ghidra <CODE>SourceType.AI</CODE>.</P>
+
+    <P>The SQL built-in <CODE>callgraph_level(entry)</CODE> computes an acyclic callgraph
+    level using Ghidra's <CODE>AcyclicCallGraphBuilder</CODE>. Root and entry-point functions
+    are level 0, and callees increase in level. Example:
+    <CODE>SELECT entry, name, callgraph_level(entry) FROM
+    FUNCTION ORDER BY callgraph_level(entry) DESC LIMIT 50;</CODE></P>
+
+    <P>Select expressions may use <CODE>AS alias</CODE> or a bare alias. The aggregate
+    built-ins <CODE>count(*)</CODE>, <CODE>count(1)</CODE>, and <CODE>count(column)</CODE>
+    count matched rows. Example:
+    <CODE>SELECT count(1) func_count FROM FUNCTION;</CODE></P>
+
+    <P><CODE>GROUP BY</CODE> supports selected aliases and expressions. Grouped output is
+    sorted by group key by default, with <CODE>NULL</CODE> groups last. Example:
+    <CODE>SELECT callgraph_level(entry) lvl, count(*) FROM FUNCTION GROUP BY
+    lvl;</CODE></P>
+
+    <P>The SQL built-in <CODE>concat(value1, value2, ...)</CODE> joins two or more
+    values as text and treats <CODE>NULL</CODE> arguments as empty strings. Example:
+    <CODE>SELECT concat(namespace, '::', name), entry FROM FUNCTION LIMIT 20;</CODE></P>
+
+    <P>The SQL built-ins <CODE>decompilation(entry)</CODE> and
+    <CODE>instructions(entry)</CODE> are supported in the select list and render multiline
+    row blocks. Examples:
+    <CODE>SELECT entry, name, decompilation(entry) FROM FUNCTION WHERE entry =
+    0x4044d1;</CODE>
+    <CODE>SELECT entry, name, instructions(entry) FROM FUNCTION WHERE entry =
+    0x4044d1;</CODE></P>
+
+    <P>The SQL built-in <CODE>prompt(expression)</CODE> invokes the configured model from the
+    select list and renders the response as a multiline row block. Constant prompts ignore the
+    selected table's row count and return one row:
+    <CODE>SELECT prompt("hello world");</CODE>
+    <CODE>SELECT prompt("hello world") FROM FUNCTION;</CODE>
+    Row-dependent prompts invoke the model for each displayed row:
+    <CODE>SELECT name, prompt(name) FROM FUNCTION LIMIT 2;</CODE>
+    During <CODE>prompt()</CODE> evaluation, the model can use read-only inspection tools and
+    read-only <CODE>RunSpecterDslQuery</CODE> calls for additional program context, but cannot
+    run database-editing tools or nested <CODE>prompt()</CODE> calls.</P>
+
+    <P>Specter seeds several sub-agents by default:
+    <CODE>Explore</CODE> for surrounding function and callgraph context,
+    <CODE>SummarizeFunction</CODE> for focused single-function summaries,
+    <CODE>StringsAndXrefs</CODE> for string-led triage,
+    <CODE>Types</CODE> for datatype and structure analysis,
+    <CODE>Naming</CODE> for rename suggestions, and
+    <CODE>Callgraph</CODE> for caller and callee mapping.</P>
+
+    <P>Configured sub-agents are available to the main assistant as tools. The assistant can list
+    the saved sub-agents, inspect one sub-agent's saved instructions, and invoke one by name to
+    delegate a focused task using the current model and the active program context.</P>
+
+    <P>These edits are intended for operator-directed annotation work inside the current program.
+    As the extension grows, this page should document those workflows and any trust or execution
+    boundaries enforced inside Ghidra.</P>
+  </BODY>
+</HTML>

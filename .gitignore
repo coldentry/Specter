@@ -1,0 +1,22 @@
+.gradle/
+.gradle-home/
+build/
+dist/
+bin/
+lib/
+
+# IDE metadata
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Extension packaging outputs
+*.zip
+*.tar
+*.tgz
