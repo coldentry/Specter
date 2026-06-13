@@ -5,7 +5,6 @@ import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.FunctionManager;
 import ghidra.program.model.listing.Program;
 import org.apache.calcite.DataContext;
-import org.apache.calcite.avatica.SqlType;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.linq4j.*;
 import org.apache.calcite.rel.type.RelDataType;
@@ -19,11 +18,11 @@ import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class SpecterFunctionTable implements ScannableTable {
+public class FunctionTable implements ScannableTable {
 
     private FunctionManager functionManager;
 
-    public SpecterFunctionTable(Program program) {
+    public FunctionTable(Program program) {
         functionManager = program.getFunctionManager();
     }
 
