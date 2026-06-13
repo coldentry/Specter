@@ -5,6 +5,7 @@ import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.FunctionManager;
 import ghidra.program.model.listing.Program;
 import org.apache.calcite.DataContext;
+import org.apache.calcite.avatica.SqlType;
 import org.apache.calcite.config.CalciteConnectionConfig;
 import org.apache.calcite.linq4j.*;
 import org.apache.calcite.rel.type.RelDataType;
@@ -31,6 +32,17 @@ public class SpecterFunctionTable implements ScannableTable {
         return relDataTypeFactory.builder()
                 .add("entry", SqlTypeName.BIGINT)
                 .add("name", SqlTypeName.VARCHAR)
+                .add("namespace", SqlTypeName.VARCHAR)
+                .add("signature", SqlTypeName.VARCHAR)
+                .add("return_type", SqlTypeName.VARCHAR)
+                .add("parameter_count", SqlTypeName.INTEGER)
+                .add("body_min", SqlTypeName.BIGINT)
+                .add("body_max", SqlTypeName.BIGINT)
+                .add("body_size", SqlTypeName.BIGINT)
+                .add("is_external", SqlTypeName.BOOLEAN)
+                .add("is_thunk", SqlTypeName.BOOLEAN)
+                .add("calling_convention", SqlTypeName.VARCHAR)
+                .add("source", SqlTypeName.VARCHAR)
                 .build();
     }
 
@@ -67,7 +79,21 @@ public class SpecterFunctionTable implements ScannableTable {
 
         @Override
         public Object[] current() {
-            return new Object[]{ currentFunction.getEntryPoint().getOffset(), currentFunction.getName() };
+            return new Object[] {
+                    currentFunction.getEntryPoint().getOffset(),
+                    currentFunction.getName(),
+                    currentFunction.getParentNamespace().getName(),
+                    currentFunction.getSignature().getPrototypeString(),
+                    currentFunction.getReturnType().getName(),
+                    currentFunction.getParameterCount(),
+                    currentFunction.getBody().getMinAddress().getOffset(),
+                    currentFunction.getBody().getMaxAddress().getOffset(),
+                    currentFunction.getBody().getNumAddresses(),
+                    currentFunction.isExternal(),
+                    currentFunction.isThunk(),
+                    currentFunction.getCallingConventionName(),
+                    currentFunction.getSymbol().getSource().getDisplayString()
+            };
         }
 
         @Override
