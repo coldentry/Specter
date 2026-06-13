@@ -41,7 +41,7 @@ public class SpecterPlugin extends ProgramPlugin {
 	private final SpecterSubAgentConfigurationManager subAgentConfigurationManager;
 	private final SpecterDisplayPreferences displayPreferences;
 	private final SpecterCodeBrowserTools codeBrowserTools;
-	private final SpecterSqlQueryService sqlQueryService;
+	private final SqlQueryService sqlQueryService;
 	private final SpecterDslService dslService;
 	private final SpecterChatService chatService;
 
@@ -56,7 +56,7 @@ public class SpecterPlugin extends ProgramPlugin {
 		subAgentConfigurationManager = new SpecterSubAgentConfigurationManager();
 		displayPreferences = new SpecterDisplayPreferences();
 		codeBrowserTools = new SpecterCodeBrowserTools(this, subAgentConfigurationManager);
-		sqlQueryService = new SpecterSqlQueryService(this::getCurrentProgram,
+		sqlQueryService = new SqlQueryService(this::getCurrentProgram,
 			new SpecterLlmPromptInvoker(configurationManager, codeBrowserTools));
 		dslService = new SpecterDslService(sqlQueryService);
 		codeBrowserTools.setDslService(dslService);

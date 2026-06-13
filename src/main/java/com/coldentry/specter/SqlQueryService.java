@@ -2,43 +2,13 @@ package com.coldentry.specter;
 
 import java.sql.*;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
-import ghidra.app.decompiler.DecompInterface;
-import ghidra.app.decompiler.DecompileResults;
-import ghidra.app.decompiler.DecompiledFunction;
-import ghidra.program.model.address.Address;
-import ghidra.program.model.address.AddressSetView;
-import ghidra.program.model.data.StringDataInstance;
-import ghidra.program.model.listing.Data;
-import ghidra.program.model.listing.DataIterator;
-import ghidra.program.model.listing.FunctionIterator;
-import ghidra.program.model.listing.Instruction;
-import ghidra.program.model.listing.InstructionIterator;
 import ghidra.program.model.listing.Program;
-import ghidra.program.model.scalar.Scalar;
 import ghidra.program.model.symbol.SourceType;
-import ghidra.program.model.symbol.Symbol;
-import ghidra.program.model.util.AcyclicCallGraphBuilder;
-import ghidra.program.model.symbol.Reference;
-import ghidra.program.model.symbol.ReferenceIterator;
-import ghidra.program.model.symbol.ReferenceManager;
-import ghidra.program.model.symbol.SymbolIterator;
-import ghidra.program.model.symbol.SymbolTable;
-import ghidra.program.util.DefinedStringIterator;
-import ghidra.util.exception.CancelledException;
-import ghidra.util.exception.DuplicateNameException;
-import ghidra.util.exception.InvalidInputException;
-import ghidra.util.graph.AbstractDependencyGraph;
-import ghidra.util.task.TaskMonitor;
 import org.apache.calcite.jdbc.CalciteConnection;
-import org.h2.expression.ValueExpression;
-import org.python.antlr.ast.Str;
-import org.python.antlr.base.stmt;
 
-final class SpecterSqlQueryService {
+final class SqlQueryService {
 
 	private static final int DEFAULT_ROW_LIMIT = 200;
 	private static final int DECOMPILATION_TIMEOUT_SECONDS = 30;
@@ -62,7 +32,7 @@ final class SpecterSqlQueryService {
 	private final Supplier<Program> programSupplier;
 	private final SpecterPromptInvoker promptInvoker;
 
-	SpecterSqlQueryService(Supplier<Program> programSupplier, SpecterPromptInvoker promptInvoker) {
+	SqlQueryService(Supplier<Program> programSupplier, SpecterPromptInvoker promptInvoker) {
 		this.programSupplier = Objects.requireNonNull(programSupplier);
 		this.promptInvoker = Objects.requireNonNull(promptInvoker);
 	}

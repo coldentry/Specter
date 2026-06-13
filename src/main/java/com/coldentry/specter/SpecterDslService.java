@@ -1,6 +1,5 @@
 package com.coldentry.specter;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,9 +10,9 @@ final class SpecterDslService {
 	private static final Pattern FOR_LOOP_PATTERN = Pattern.compile(
 		"(?is)^\\s*FOR\\s+([A-Za-z_][A-Za-z0-9_]*)\\s+IN\\s+(.+?)\\s*;\\s*DO\\s+(.+?)\\s*;?\\s*END\\s*;\\s*$");
 
-	private final SpecterSqlQueryService sqlQueryService;
+	private final SqlQueryService sqlQueryService;
 
-	SpecterDslService(SpecterSqlQueryService sqlQueryService) {
+	SpecterDslService(SqlQueryService sqlQueryService) {
 		this.sqlQueryService = sqlQueryService;
 	}
 
