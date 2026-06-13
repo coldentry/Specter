@@ -57,38 +57,7 @@ final class SpecterDslService {
 
 	private String executeForLoop(String script, WriteApproval writeApproval,
 			SpecterStreamingResponseListener listener) {
-		ForLoop loop = parseForLoop(script);
-		if (startsWithKeyword(loop.bodySql(), "UPDATE")) {
-			writeApproval.approve("Run Specter DSL loop containing a database write statement:\n\n" +
-				loop.bodySql());
-		}
-		SpecterSqlQueryService.SqlResult loopResult =
-			sqlQueryService.executeStructured(loop.selectorSql(), listener);
-		if (loopResult.rows().isEmpty()) {
-			return "DSL: FOR query returned no rows.";
-		}
-
-		StringBuilder builder = new StringBuilder();
-		for (List<Object> row : loopResult.rows()) {
-			if (row.isEmpty()) {
-				continue;
-			}
-			Object value = row.get(0);
-			String literal = SpecterSqlQueryService.formatSqlLiteral(value);
-			String bodySql = substituteVariable(loop.bodySql(), loop.variableName(), literal);
-			if (!builder.isEmpty()) {
-				builder.append("\n\n");
-			}
-			builder.append("DSL: ").append(loop.variableName()).append(" = ")
-					.append(String.valueOf(value)).append('\n');
-			builder.append(sqlQueryService.execute(bodySql, listener));
-			if (builder.length() > MAX_RENDERED_LENGTH) {
-				builder.setLength(MAX_RENDERED_LENGTH);
-				builder.append("\n... DSL output truncated.");
-				break;
-			}
-		}
-		return builder.isEmpty() ? "DSL: FOR query produced no bindable values." : builder.toString();
+        return "Not implemented.";
 	}
 
 	private ForLoop parseForLoop(String script) {

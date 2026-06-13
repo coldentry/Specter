@@ -61,6 +61,7 @@ dependencies {
 	// Any external dependencies added here will automatically be copied to the lib/ directory when
 	// this extension is built.
 	implementation 'dev.langchain4j:langchain4j-open-ai:1.9.1'
+    implementation 'org.apache.calcite:calcite-core:1.42.0'
 }
 
 // Exclude additional files from the built extension
