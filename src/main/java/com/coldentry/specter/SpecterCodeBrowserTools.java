@@ -79,12 +79,12 @@ final class SpecterCodeBrowserTools implements SpecterToolHost {
 	};
 	private final List<ToolSpecification> coreToolSpecifications = List.of(
 		ToolSpecification.builder()
-				.name("RunSpecterDslQuery")
+				.name("RunSpecterSqlQuery")
 				.description(
-					"Run a Specter DSL query against the active program. Valid tables are only FUNCTION, STRING, DATA, REFERENCE, and SYMBOL. instructions(entry), decompilation(entry), callgraph_level(entry), concat(...), and prompt(...) are SELECT expressions, not tables; for assembly use SELECT entry, name, instructions(entry) FROM FUNCTION WHERE entry = 0x...;. Use JOIN for caller/callee queries. For call references, use type IN ('COMPUTED_CALL', 'UNCONDITIONAL_CALL'); there is no generic CALL type. UPDATE FUNCTION, DATA, and SYMBOL are supported for listing renames. Database-writing UPDATE statements are approval-gated by Specter, so call this tool directly when the user requests a clear rename.")
+                        "Run a Specter SQL query against the active program. Valid tables are functions, xrefs, and decompilation.")
 				.parameters(JsonObjectSchema.builder()
 						.addStringProperty("query",
-							"Specter DSL or SQL query ending with ';', for example SELECT entry, name FROM FUNCTION WHERE name LIKE 'FUN_%' LIMIT 20;")
+							"Specter SQL query ending with ';', for example SELECT entry, name FROM functions WHERE name LIKE 'FUN_%' LIMIT 20;")
 						.required("query")
 						.additionalProperties(false)
 						.build())
@@ -355,7 +355,7 @@ final class SpecterCodeBrowserTools implements SpecterToolHost {
 	public String execute(ToolExecutionRequest request) {
 		try {
 			return limitResponseLength(switch (request.name()) {
-				case "RunSpecterDslQuery" ->
+				case "RunSpecterSqlQuery" ->
 					runSpecterDslQuery(readRequiredStringArgument(request, "query"));
 				case "GetCurrentAddress" -> getCurrentAddress();
 				case "SetListingComment" -> setListingComment(
@@ -413,7 +413,7 @@ final class SpecterCodeBrowserTools implements SpecterToolHost {
 			throw new IllegalStateException("Specter DSL service is unavailable.");
 		}
 		return dslService.execute(query,
-			changeSummary -> approveDatabaseEdit("RunSpecterDslQuery", changeSummary));
+			changeSummary -> approveDatabaseEdit("RunSpecterSqlQuery", changeSummary));
 	}
 
 	private String listSubAgents() {

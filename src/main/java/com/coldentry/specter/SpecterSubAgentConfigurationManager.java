@@ -113,9 +113,8 @@ final class SpecterSubAgentConfigurationManager {
 
 				Build a quick exploration summary using the available program tools:
 				- identify the relevant function or symbol
-				- inspect the current function with RunSpecterDslQuery over FUNCTION using decompilation(entry) or instructions(entry) in the SELECT list
-				- inspect inbound references with RunSpecterDslQuery joining REFERENCE to FUNCTION to understand who calls or reaches it
-				- use RunSpecterDslQuery over FUNCTION or SYMBOL when you need to pivot to related functions or symbols by name
+				- inspect the current function with RunSpecterSqlQuery over the functions and decompilation tables.
+				- inspect xrefs with RunSpecterSqlQuery joining REFERENCES to FUNCTIONS to understand who calls or reaches it
 
 				Focus on callgraph-oriented context:
 				- entry points and nearby functions
