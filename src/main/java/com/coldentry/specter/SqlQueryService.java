@@ -129,9 +129,9 @@ final class SqlQueryService {
         }
 
         var rootSchema = calciteConnection.getRootSchema();
-        //var specterSchema = new SpecterSchema(programSupplier.get());
         rootSchema.add("functions", new FunctionTable(programSupplier.get()));
         rootSchema.add("decompilation", new DecompilationTable(programSupplier.get()));
+        rootSchema.add("xrefs", new ReferenceTable(programSupplier.get()));
 
         Statement stmt = null;
         try {
