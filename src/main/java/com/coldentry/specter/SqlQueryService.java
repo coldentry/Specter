@@ -132,6 +132,7 @@ final class SqlQueryService {
         rootSchema.add("functions", new FunctionTable(programSupplier.get()));
         rootSchema.add("decompilation", new DecompilationTable(programSupplier.get()));
         rootSchema.add("xrefs", new ReferenceTable(programSupplier.get()));
+        rootSchema.add("strings", new StringTable(programSupplier.get()));
 
         Statement stmt = null;
         try {
